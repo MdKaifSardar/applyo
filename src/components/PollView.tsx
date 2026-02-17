@@ -20,6 +20,7 @@ export function PollView({ pollId }: { pollId: string }) {
   const [hasVoted, setHasVoted] = useState(false);
   const [voting, setVoting] = useState(false);
   const [votedOptionId, setVotedOptionId] = useState<string | null>(null);
+  const [votingOptionId, setVotingOptionId] = useState<string | null>(null);
 
   // 1. Auth & Initial Check
   useEffect(() => {
@@ -70,6 +71,7 @@ export function PollView({ pollId }: { pollId: string }) {
   const handleVote = async (optionId: string) => {
     if (!user || hasVoted || voting) return;
     setVoting(true);
+    setVotingOptionId(optionId);
 
     try {
       const pollRef = doc(db, "polls", pollId);
@@ -104,6 +106,7 @@ export function PollView({ pollId }: { pollId: string }) {
       alert(err.message || "Vote failed");
     } finally {
       setVoting(false);
+      setVotingOptionId(null);
     }
   };
 
@@ -146,19 +149,22 @@ export function PollView({ pollId }: { pollId: string }) {
                 ? Math.round(((option.voteCount || 0) / totalVotes) * 100)
                 : 0;
             const isSelected = votedOptionId === option.id;
+            const isVotingThis = votingOptionId === option.id;
 
             return (
               <div key={option.id} className="relative group/option">
-                {/* Result Bar Background */}
-                <div
-                  className={`absolute top-0 left-0 h-full rounded-xl transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]
-                    ${isSelected ? "bg-primary/20" : "bg-muted"}
-                  `}
-                  style={{
-                    width: hasVoted ? `${percentage}%` : "0%",
-                    opacity: hasVoted ? 1 : 0,
-                  }}
-                />
+                {/* Result Bar Background - Wrapped to prevent overflow */}
+                <div className="absolute inset-0 rounded-xl overflow-hidden pointer-events-none">
+                  <div
+                    className={`h-full transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]
+                      ${isSelected ? "bg-primary/20" : "bg-muted"}
+                    `}
+                    style={{
+                      width: hasVoted ? `${percentage}%` : "0%",
+                      opacity: hasVoted ? 1 : 0,
+                    }}
+                  />
+                </div>
 
                 <button
                   onClick={() => handleVote(option.id)}
@@ -170,14 +176,18 @@ export function PollView({ pollId }: { pollId: string }) {
                         : "border-input hover:border-primary/50 hover:bg-accent/50 active:scale-[0.99]"
                     }
                     ${isSelected ? "border-primary ring-1 ring-primary/20" : ""}
+                    disabled:opacity-70 disabled:cursor-not-allowed
                   `}
                 >
                   <span
-                    className={`font-medium text-lg transition-colors ${
+                    className={`font-medium text-lg transition-colors flex items-center gap-3 ${
                       isSelected ? "text-primary font-bold" : "text-foreground"
                     }`}
                   >
                     {option.text}
+                    {isVotingThis && (
+                      <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    )}
                   </span>
 
                   {hasVoted && (

@@ -1,54 +1,41 @@
-# Real-Time Poll Rooms 📊
+# Poll Rooms 📊
 
-A minimalist, real-time polling application built with Next.js and Firebase.
+A real-time polling application built with Next.js and Firebase. Creating a poll is instant, and results update live for everyone.
 
-## Features
+## Fairness & Anti-Abuse Mechanisms
 
-- **Instant Poll Creation**: Create a poll with a question and multiple options.
-- **Real-Time Updates**: Watch votes come in live without refreshing (powered by Firestore listeners).
-- **Shareable Links**: Unique short URLs for every poll.
-- **Fairness Enforced**: Prevents double voting using strict mechanisms.
+To ensure fair voting, potential abuse is handled in two main ways:
 
-## Fairness Mechanisms
+1.  **Identity Persistence (Anonymous Auth)**
+    Every visitor is assigned a unique, persistent ID tied to their browser session. This prevents the most common form of abuse—simply refreshing the page to vote again. The ID sticks around even if the user closes and reopens the tab.
 
-This app implements two layers of protection against abuse:
+2.  **Concurrency Control (Transactions)**
+    Voting logic is wrapped in a Firestore Transaction. This means the server atomically checks if a user has already voted _before_ incrementing the count. It effectively prevents race conditions where a user might try to "double-click" or send simultaneous requests to trick the system.
 
-1.  **Anonymous Authentication (Client Identity)**:
-    - Every visitor is assigned a persistent Anonymous User ID via Firebase Auth.
-    - This ID is used to track their vote status across sessions.
+## Edge Cases Handled
 
-2.  **Firestore Transactions (Server-Side Enforcement)**:
-    - Voting is performed via a database transaction.
-    - The transaction atomically checks if a vote document already exists for the User ID _before_ counting the vote.
-    - This guarantees that even if a user tries to send multiple requests simultaneously, only one will succeed.
+- **Live Updates:** Results sync instantly across all connected clients. No refresh needed.
+- **Invalid Links:** Navigating to a non-existent poll ID displays a clear, friendly error message instead of crashing.
+- **Race Conditions:** As mentioned above, database transactions ensure vote counts remain accurate even under heavy concurrent load.
+- **Loading States:** The UI provides feedback (spinners/disabled states) during data fetching and voting actions to prevent confusion.
 
-## How to Run
+## Known Limitations
 
-1.  **Configure Firebase**:
-    - Create a project at [console.firebase.google.com](https://console.firebase.google.com).
-    - Enable **Authentication** (Anonymous provider).
-    - Enable **Firestore Database**.
-    - Create a `.env.local` file with your config:
-      ```bash
-      NEXT_PUBLIC_FIREBASE_API_KEY=...
-      NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
-      NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
-      NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
-      NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
-      NEXT_PUBLIC_FIREBASE_APP_ID=...
-      ```
-    - **Important**: Set Firestore Rules to allow reads/writes (for demo purposes) or restrict writes to valid votes.
-2.  **Install Dependencies**:
+- **Browser-Bound Identity:** Since we use strict anonymity, a determined user could vote multiple times by using Incognito mode or a different browser. Moving to email/social login would solve this but adds friction.
+- **No Expiration:** Polls currently live indefinitely. Adding an expiry date or "close poll" feature would be a logical next step.
+
+## How to Run Locally
+
+1.  Clone the repo and install dependencies:
     ```bash
     npm install
     ```
-3.  **Start Dev Server**:
+2.  Set up your `.env.local` with Firebase credentials:
+    ```bash
+    NEXT_PUBLIC_FIREBASE_API_KEY=...
+    # ... (other standard firebase config)
+    ```
+3.  Run the development server:
     ```bash
     npm run dev
     ```
-
-## Edge Case Handling
-
-- **Invalid Poll ID**: Shows a friendly error message if the poll doesn't exist.
-- **Network Issues**: Retries connections automatically; voting disabled while offline.
-- **Double Voting**: The UI locks immediately after voting, and the backend transaction rejects subsequent attempts.
