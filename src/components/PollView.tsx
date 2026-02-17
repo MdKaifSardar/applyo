@@ -122,21 +122,24 @@ export function PollView({ pollId }: { pollId: string }) {
   );
 
   return (
-    <div className="max-w-xl mx-auto p-4 sm:p-8">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+    <div className="w-full  max-w-5xl lg:max-w-none lg:w-[50vw] mx-auto p-4 sm:p-8">
+      <div className="bg-card text-card-foreground rounded-2xl shadow-xl border border-border p-6 sm:p-8 transition-colors">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-3 leading-tight">
             {poll.question}
           </h1>
           <button
             onClick={copyLink}
-            className="text-xs text-blue-500 hover:text-blue-600 font-medium"
+            className="group flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium transition-colors bg-primary/5 px-3 py-1.5 rounded-full w-fit"
           >
-            Share Link 🔗
+            <span>Share Link</span>
+            <span className="group-hover:translate-x-0.5 transition-transform">
+              🔗
+            </span>
           </button>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {poll.options.map((option) => {
             const percentage =
               totalVotes > 0
@@ -145,35 +148,47 @@ export function PollView({ pollId }: { pollId: string }) {
             const isSelected = votedOptionId === option.id;
 
             return (
-              <div key={option.id} className="relative group">
+              <div key={option.id} className="relative group/option">
                 {/* Result Bar Background */}
                 <div
-                  className="absolute top-0 left-0 h-full bg-blue-50 rounded-lg transition-all duration-500 ease-out"
-                  style={{ width: `${percentage}%`, opacity: hasVoted ? 1 : 0 }}
+                  className={`absolute top-0 left-0 h-full rounded-xl transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]
+                    ${isSelected ? "bg-primary/20" : "bg-muted"}
+                  `}
+                  style={{
+                    width: hasVoted ? `${percentage}%` : "0%",
+                    opacity: hasVoted ? 1 : 0,
+                  }}
                 />
 
                 <button
                   onClick={() => handleVote(option.id)}
                   disabled={hasVoted || voting}
-                  className={`relative w-full text-left px-4 py-3 rounded-lg border transition-all z-10 flex justify-between items-center
+                  className={`relative w-full text-left px-5 py-4 rounded-xl border-2 transition-all z-10 flex justify-between items-center bg-transparent
                     ${
                       hasVoted
                         ? "border-transparent cursor-default"
-                        : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+                        : "border-input hover:border-primary/50 hover:bg-accent/50 active:scale-[0.99]"
                     }
-                    ${isSelected ? "ring-2 ring-blue-500 bg-blue-50" : ""}
+                    ${isSelected ? "border-primary ring-1 ring-primary/20" : ""}
                   `}
                 >
                   <span
-                    className={`font-medium ${isSelected ? "text-blue-700" : "text-gray-800"}`}
+                    className={`font-medium text-lg transition-colors ${
+                      isSelected ? "text-primary font-bold" : "text-foreground"
+                    }`}
                   >
                     {option.text}
                   </span>
 
                   {hasVoted && (
-                    <span className="text-sm font-semibold text-gray-600">
-                      {percentage}% ({option.voteCount || 0})
-                    </span>
+                    <div className="flex flex-col items-end animate-in fade-in slide-in-from-right-4 duration-500">
+                      <span className="text-sm font-bold text-foreground">
+                        {percentage}%
+                      </span>
+                      <span className="text-xs text-muted-foreground font-medium">
+                        {option.voteCount || 0} votes
+                      </span>
+                    </div>
                   )}
                 </button>
               </div>
@@ -181,8 +196,13 @@ export function PollView({ pollId }: { pollId: string }) {
           })}
         </div>
 
-        <div className="mt-6 text-right text-xs text-gray-400">
-          {totalVotes} votes • {hasVoted ? "You voted" : "Tap to vote"}
+        <div className="mt-8 pt-6 border-t border-border flex justify-between items-center text-sm text-muted-foreground">
+          <span className="font-medium">
+            {totalVotes} {totalVotes === 1 ? "Vote" : "Votes"}
+          </span>
+          <span className="bg-muted px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+            {hasVoted ? "Voted" : "Active Poll"}
+          </span>
         </div>
       </div>
     </div>

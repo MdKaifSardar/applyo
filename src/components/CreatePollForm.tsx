@@ -25,12 +25,12 @@ export function CreatePollForm() {
   return (
     <form
       action={createPoll}
-      className="space-y-6 max-w-md mx-auto p-6 bg-white rounded-xl shadow-sm border border-gray-100"
+      className="space-y-6 w-full max-w-5xl lg:max-w-none lg:w-[50vw] mx-auto p-8 bg-card text-card-foreground rounded-xl shadow-lg border border-border transition-colors duration-200"
     >
       <div className="space-y-2">
         <label
           htmlFor="question"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-foreground/80"
         >
           Poll Question
         </label>
@@ -40,16 +40,16 @@ export function CreatePollForm() {
           name="question"
           required
           placeholder="What's your favorite color?"
-          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
+          className="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
       <div className="space-y-3">
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-foreground/80">
           Options
         </label>
         {options.map((option, index) => (
-          <div key={index} className="flex gap-2">
+          <div key={index} className="flex gap-2 group">
             <input
               type="text"
               name="options"
@@ -57,13 +57,13 @@ export function CreatePollForm() {
               onChange={(e) => updateOption(index, e.target.value)}
               required
               placeholder={`Option ${index + 1}`}
-              className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-gray-900"
+              className="flex-1 px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent outline-none transition-all text-foreground placeholder:text-muted-foreground"
             />
             {options.length > 2 && (
               <button
                 type="button"
                 onClick={() => removeOption(index)}
-                className="px-3 py-2 text-gray-400 hover:text-red-500 transition-colors"
+                className="px-3 py-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                 aria-label="Remove option"
               >
                 ✕
@@ -75,7 +75,7 @@ export function CreatePollForm() {
         <button
           type="button"
           onClick={addOption}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 transition-colors"
+          className="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1 transition-colors px-2 py-1 rounded-md hover:bg-primary/5"
         >
           + Add Option
         </button>
@@ -83,7 +83,7 @@ export function CreatePollForm() {
 
       <button
         type="submit"
-        className="w-full bg-black text-white py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors focus:ring-4 focus:ring-gray-100"
+        className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:bg-primary/90 transition-all focus:ring-4 focus:ring-primary/20 shadow-md active:scale-[0.99]"
       >
         Create Poll
       </button>
